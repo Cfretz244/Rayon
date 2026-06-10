@@ -13,6 +13,10 @@ import java.util.function.Consumer;
 
 /**
  * Prevents certain packets from being sent for {@link EntityPhysicsElement}s.
+ *
+ * 1.21.4 sendChanges accept ordinals: 0 = SetPassengers, 1 = passenger Rot,
+ * 2 = projectile motion bundle, 3 = SetEntityMotion, 4 = consolidated move packet,
+ * 5 = RotateHead. Re-verify on every Minecraft bump.
  */
 @Mixin(ServerEntity.class)
 public class EntityTrackerEntryMixin {
@@ -37,7 +41,7 @@ public class EntityTrackerEntryMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
-                    ordinal = 2
+                    ordinal = 3
             )
     )
     public void velocity(Consumer consumer, Object object) {
@@ -51,7 +55,7 @@ public class EntityTrackerEntryMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
-                    ordinal = 3
+                    ordinal = 4
             )
     )
     public void multiple(Consumer consumer, Object object) {

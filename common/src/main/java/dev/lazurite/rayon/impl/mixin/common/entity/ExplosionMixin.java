@@ -4,52 +4,33 @@ import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.api.PhysicsElement;
 import dev.lazurite.rayon.impl.bullet.math.Convert;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.List;
-import java.util.Set;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * Allows {@link PhysicsElement} objects to be affected by explosions.
+ *
+ * 1.21.2: Explosion became an interface; the server-side logic lives in
+ * {@link ServerExplosion}, and knockback is applied via Entity.push(Vec3).
  */
-@Mixin(Explosion.class)
+@Mixin(ServerExplosion.class)
 public class ExplosionMixin {
-    @Unique
-    private Entity entity;
-
-    @Inject(
-            method = "explode",
+    @Redirect(
+            method = "hurtEntities",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;ignoreExplosion()Z"
-            ),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    public void collectBlocksAndDamageEntities(CallbackInfo info, Set set, int q, float r, int s, int t, int u, int v, int w, int x, List list, Vec3 vec3, int y, Entity entity) {
-        this.entity = entity;
-    }
-
-    @ModifyArg(
-            method = "explode",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"
+                    target = "Lnet/minecraft/world/entity/Entity;push(Lnet/minecraft/world/phys/Vec3;)V"
             )
     )
-    public Vec3 setVelocity(Vec3 velocity) {
+    public void hurtEntities$push(Entity entity, Vec3 velocity) {
         if (EntityPhysicsElement.is(entity)) {
             var element = EntityPhysicsElement.get(entity);
             element.getRigidBody().applyCentralImpulse(Convert.toBullet(velocity).multLocal(element.getRigidBody().getMass() * 100f));
+        } else {
+            entity.push(velocity);
         }
-
-        return velocity;
     }
 }

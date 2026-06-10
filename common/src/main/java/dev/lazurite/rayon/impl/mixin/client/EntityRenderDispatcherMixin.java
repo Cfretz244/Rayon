@@ -1,35 +1,22 @@
 package dev.lazurite.rayon.impl.mixin.client;
 
-import com.jme3.math.Vector3f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lazurite.rayon.api.EntityPhysicsElement;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.Entity;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Corrects the positions of shadows and debug hitboxes.
+ * Hides debug hitboxes for physics elements (their collision shape is drawn by
+ * {@link dev.lazurite.rayon.impl.util.debug.CollisionObjectDebugger} instead).
+ * Shadow positioning is handled by {@link EntityRendererMixin} since 1.21.2
+ * (renderShadow reads world coordinates from the EntityRenderState).
  */
 @Mixin(EntityRenderDispatcher.class)
 public abstract class EntityRenderDispatcherMixin {
-    @ModifyVariable(
-            method = "renderShadow",
-            at = @At(value = "STORE", opcode = Opcodes.DSTORE),
-            ordinal = 1
-    )
-    private static double renderShadowY(double e, PoseStack matrices, MultiBufferSource provider, Entity entity, float opacity, float tickDelta) {
-        if (EntityPhysicsElement.is(entity)) {
-            return EntityPhysicsElement.get(entity).getPhysicsLocation(new Vector3f(), tickDelta).y;
-        }
-
-        return e;
-    }
-
     // 1.21: renderHitbox gained red/green/blue colour params.
     @Inject(method = "renderHitbox", at = @At("HEAD"), cancellable = true)
     private static void renderHitbox(PoseStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo info) {

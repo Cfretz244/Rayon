@@ -12,7 +12,7 @@ import dev.lazurite.rayon.impl.bullet.math.Convert;
 import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
 import dev.lazurite.rayon.impl.bullet.collision.space.MinecraftSpace;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 
 /**
  * This class handles debug rendering on the client. Press F3+r to render
@@ -34,7 +34,8 @@ public final class CollisionObjectDebugger {
 
     public static void renderSpace(MinecraftSpace space, PoseStack stack, float tickDelta) {
         final var cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        // 1.21.2: core shader programs are registry constants; setShader takes the ShaderProgram directly.
+        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
         // 1.21: Tesselator.begin(mode, format) now both allocates and begins the BufferBuilder
         // (there is no getBuilder()/builder.begin()); the draw is BufferUploader.drawWithShader(MeshData).
