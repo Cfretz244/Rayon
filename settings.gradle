@@ -4,21 +4,8 @@ pluginManagement {
             name 'Fabric'
             url 'https://maven.fabricmc.net/'
         }
-        maven {
-            name 'Forge'
-            url 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            name 'Architectury'
-            url 'https://maven.architectury.dev/'
-        }
         gradlePluginPortal()
     }
 }
 
 rootProject.name = 'rayon'
-
-include 'common', 'fabric'
-if (forge_enabled.toBoolean()) {
-    include 'forge'
-}

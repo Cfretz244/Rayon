@@ -1,63 +1,70 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version "$shadow_version"
-    id 'architectury-plugin' version "$architectury_plugin_version"
-    id 'dev.architectury.loom' version "$loom_version" apply false
+    id 'net.fabricmc.fabric-loom' version "$loom_version"
+    id 'maven-publish'
     id 'java'
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
+version "${mod_version}+${minecraft_version}"
+group maven_group
+
+base {
+    archivesName = 'rayon-fabric'
 }
 
-subprojects {
-    apply plugin: 'com.github.johnrengelman.shadow'
-    apply plugin: 'dev.architectury.loom'
-    apply plugin: 'architectury-plugin'
-    apply plugin: 'maven-publish'
-
-    version "${mod_version}+${minecraft_version}"
-    group maven_group
-
-    archivesBaseName = rootProject.archivesBaseName + '-' + name
-    loom.silentMojangMappingsLicense()
-
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-
-        withSourcesJar()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:$minecraft_version"
+
+    // 26.1+: Minecraft is unobfuscated — no mappings, and mod deps are plain implementation.
+    implementation "net.fabricmc:fabric-loader:$fabric_loader_version"
+    implementation "net.fabricmc.fabric-api:fabric-api:$fabric_api_version"
+
+    api include("com.github.stephengold:Libbulletjme:$libbulletjme_version")
+    api include("dev.lazurite:toolbox-fabric:$toolbox_version"), { transitive false }
+    api include("dev.lazurite:transporter-fabric:$transporter_version"), { transitive false }
+}
+
+processResources {
+    inputs.property 'version', version
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+publishing {
     repositories {
-        mavenCentral()
-        maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
-        maven { name 'Architectury'; url 'https://maven.architectury.dev/' }
-        mavenLocal()
-    }
-
-    dependencies {
-        minecraft "com.mojang:minecraft:$minecraft_version"
-        mappings loom.officialMojangMappings()
-    }
-
-    publishing {
-        repositories {
-            maven {
-                name 'Lazurite'
-                url 'https://lazurite.dev/releases'
-                credentials(PasswordCredentials)
-                authentication {
-                    register("basic", BasicAuthentication)
-                }
+        maven {
+            name 'Lazurite'
+            url 'https://lazurite.dev/releases'
+            credentials(PasswordCredentials)
+            authentication {
+                register("basic", BasicAuthentication)
             }
         }
+    }
 
-        publications {
-            "${project.name}"(MavenPublication) {
-                artifactId = archivesBaseName
-                from components.java
-            }
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = base.archivesName.get()
+            from components.java
         }
     }
 }
