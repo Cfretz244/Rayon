@@ -136,7 +136,7 @@ public final class ServerEventHandler {
 
             /* Set entity position */
             var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
-            rigidBody.getElement().cast().absMoveTo(location.x, location.y, location.z);
+            rigidBody.getElement().cast().absSnapTo(location.x, location.y, location.z);
         }
     }
 

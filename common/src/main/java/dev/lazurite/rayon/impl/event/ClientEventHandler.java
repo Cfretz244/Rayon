@@ -2,6 +2,7 @@ package dev.lazurite.rayon.impl.event;
 
 import com.jme3.math.Vector3f;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import dev.lazurite.rayon.api.EntityPhysicsElement;
 import dev.lazurite.rayon.api.event.collision.PhysicsSpaceEvents;
 import dev.lazurite.rayon.impl.bullet.collision.body.ElementRigidBody;
@@ -44,7 +45,7 @@ public final class ClientEventHandler {
         ClientEvents.Tick.END_LEVEL_TICK.register(ClientEventHandler::onEntityStartLevelTick);
 
         // Render Events
-        ClientEvents.Render.BEFORE_DEBUG.register((poseStack, camera, level, tickDelta) -> ClientEventHandler.onDebugRender(level, poseStack, tickDelta));
+        ClientEvents.Render.BEFORE_DEBUG.register((poseStack, camera, level, bufferSource, tickDelta) -> ClientEventHandler.onDebugRender(level, poseStack, bufferSource, tickDelta));
 
         // Entity Events
         ClientEvents.Entity.LOAD.register(ClientEventHandler::onEntityLoad);
@@ -79,9 +80,9 @@ public final class ClientEventHandler {
         thread.destroy();
     }
 
-    public static void onDebugRender(Level level, PoseStack stack, float tickDelta) {
+    public static void onDebugRender(Level level, PoseStack stack, MultiBufferSource.BufferSource bufferSource, float tickDelta) {
         if (CollisionObjectDebugger.isEnabled()) {
-            CollisionObjectDebugger.renderSpace(MinecraftSpace.get(level), stack, tickDelta);
+            CollisionObjectDebugger.renderSpace(MinecraftSpace.get(level), stack, bufferSource, tickDelta);
         }
     }
 
@@ -123,7 +124,7 @@ public final class ClientEventHandler {
 
             /* Set entity position */
             var location = rigidBody.getFrame().getLocation(new Vector3f(), 1.0f);
-            rigidBody.getElement().cast().absMoveTo(location.x, location.y, location.z);
+            rigidBody.getElement().cast().absSnapTo(location.x, location.y, location.z);
         }
     }
 

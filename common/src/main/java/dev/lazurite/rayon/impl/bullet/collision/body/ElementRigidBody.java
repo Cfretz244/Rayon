@@ -14,6 +14,7 @@ import dev.lazurite.toolbox.api.math.VectorHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.phys.AABB;
 
 import java.security.InvalidParameterException;
@@ -55,16 +56,11 @@ public abstract class ElementRigidBody extends MinecraftRigidBody {
         return this.element;
     }
 
-    public void readTagInfo(CompoundTag tag) {
-        if (tag.contains("orientation")) {
-            this.setPhysicsRotation(Convert.toBullet(QuaternionHelper.fromTag(tag.getCompound("orientation"))));
-        }
-        if (tag.contains("linearVelocity")) {
-            this.setLinearVelocity(Convert.toBullet(VectorHelper.fromTag(tag.getCompound("linearVelocity"))));
-        }
-        if (tag.contains("angularVelocity")) {
-            this.setAngularVelocity(Convert.toBullet(VectorHelper.fromTag(tag.getCompound("angularVelocity"))));
-        }
+    // 1.21.6: reads from a ValueInput (same keys/format as the old CompoundTag).
+    public void readTagInfo(ValueInput input) {
+        input.read("orientation", CompoundTag.CODEC).ifPresent(tag -> this.setPhysicsRotation(Convert.toBullet(QuaternionHelper.fromTag(tag))));
+        input.read("linearVelocity", CompoundTag.CODEC).ifPresent(tag -> this.setLinearVelocity(Convert.toBullet(VectorHelper.fromTag(tag))));
+        input.read("angularVelocity", CompoundTag.CODEC).ifPresent(tag -> this.setAngularVelocity(Convert.toBullet(VectorHelper.fromTag(tag))));
 //        this.setMass(tag.getFloat("mass"));
 //        this.setDragCoefficient(tag.getFloat("dragCoefficient"));
 //        this.setFriction(tag.getFloat("friction"));

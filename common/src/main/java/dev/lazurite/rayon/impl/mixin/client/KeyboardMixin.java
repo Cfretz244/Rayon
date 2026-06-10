@@ -15,7 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(KeyboardHandler.class)
 public abstract class KeyboardMixin {
-    @Shadow protected abstract void debugFeedbackTranslated(String string, Object... objects);
+    // 1.21.x: the no-args variant dropped its varargs (debugFeedbackFormatted has them now).
+    @Shadow protected abstract void debugFeedbackTranslated(String string);
 
     @Inject(method = "handleDebugKeys", at = @At("HEAD"), cancellable = true)
     private void processF3(int key, CallbackInfoReturnable<Boolean> info) {

@@ -26,6 +26,11 @@ public abstract class EntityRendererMixin {
             state.x = location.x;
             state.y = location.y;
             state.z = location.z;
+
+            // 1.21.8: debug hitboxes render from the state; physics elements draw their own
+            // collision shapes via CollisionObjectDebugger instead.
+            state.hitboxesRenderState = null;
+            state.serverHitboxesRenderState = null;
         }
     }
 }
