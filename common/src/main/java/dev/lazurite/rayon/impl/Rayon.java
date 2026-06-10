@@ -31,7 +31,7 @@ public class Rayon {
 
 		// Rayon Server Detection
 		ServerEvents.Lifecycle.JOIN.register(player -> {
-			ServerNetworking.send(player, new ResourceLocation(MODID, "i_have_rayon"), buf -> {});
+			ServerNetworking.send(player, ResourceLocation.fromNamespaceAndPath(MODID, "i_have_rayon"), buf -> {});
 		});
 	}
 
@@ -40,7 +40,7 @@ public class Rayon {
 		EntityNetworking.registerClient();
 
 		// Rayon Server Detection
-		PacketRegistry.registerClientbound(new ResourceLocation(MODID, "i_have_rayon"), ctx -> serverHasRayon = true);
+		PacketRegistry.registerClientbound(ResourceLocation.fromNamespaceAndPath(MODID, "i_have_rayon"), ctx -> serverHasRayon = true);
 		ClientEvents.Lifecycle.DISCONNECT.register((client, level) -> serverHasRayon = false);
 	}
 

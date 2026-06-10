@@ -30,8 +30,9 @@ public abstract class EntityRenderDispatcherMixin {
         return e;
     }
 
+    // 1.21: renderHitbox gained red/green/blue colour params.
     @Inject(method = "renderHitbox", at = @At("HEAD"), cancellable = true)
-    private static void renderHitbox(PoseStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, CallbackInfo info) {
+    private static void renderHitbox(PoseStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, float red, float green, float blue, CallbackInfo info) {
         if (EntityPhysicsElement.is(entity)) {
             info.cancel();
         }

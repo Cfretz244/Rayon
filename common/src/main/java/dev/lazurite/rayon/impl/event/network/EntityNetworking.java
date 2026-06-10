@@ -20,8 +20,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface EntityNetworking {
-    ResourceLocation MOVEMENT = new ResourceLocation(Rayon.MODID, "movement");
-    ResourceLocation PROPERTIES = new ResourceLocation(Rayon.MODID, "properties");
+    ResourceLocation MOVEMENT = ResourceLocation.fromNamespaceAndPath(Rayon.MODID, "movement");
+    ResourceLocation PROPERTIES = ResourceLocation.fromNamespaceAndPath(Rayon.MODID, "properties");
 
     static void register() {
         PacketRegistry.registerServerbound(MOVEMENT, ServerEventHandler::onMovementPacketReceived);

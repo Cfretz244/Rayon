@@ -23,17 +23,16 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
 
         withSourcesJar()
     }
 
     repositories {
-        maven {
-            name 'Lazurite'
-            url 'https://lazurite.dev/releases'
-        }
+        mavenCentral()
+        maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
+        maven { name 'Architectury'; url 'https://maven.architectury.dev/' }
         mavenLocal()
     }
 
