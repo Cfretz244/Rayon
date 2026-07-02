@@ -67,6 +67,12 @@ public class EntityRigidBody extends ElementRigidBody {
     }
 
     @Override
+    public void setWaterDragScale(float waterDragScale) {
+        super.setWaterDragScale(waterDragScale);
+        this.dirtyProperties = true;
+    }
+
+    @Override
     public void setFriction(float friction) {
         super.setFriction(friction);
         this.dirtyProperties = true;
