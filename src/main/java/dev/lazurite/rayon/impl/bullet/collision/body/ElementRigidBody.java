@@ -28,6 +28,11 @@ public abstract class ElementRigidBody extends MinecraftRigidBody {
     private final Clock sleepTimer;
     private boolean terrainLoading;
     private float dragCoefficient;
+    // Multiplier on the water-drag force applied to submerged triangles (see PressureGenerator).
+    // 1.0 = normal water drag; 0.0 = none. Lets a body (e.g. a submersible) move through water with
+    // reduced resistance without disabling its other drag. Defaults to 1.0 so existing bodies are
+    // unaffected.
+    private float waterDragScale = 1.0f;
     private BuoyancyType buoyancyType;
     private DragType dragType;
     private BoundingBox currentBoundingBox = new BoundingBox();
@@ -83,6 +88,14 @@ public abstract class ElementRigidBody extends MinecraftRigidBody {
 
     public void setDragCoefficient(float dragCoefficient) {
         this.dragCoefficient = dragCoefficient;
+    }
+
+    public float getWaterDragScale() {
+        return this.waterDragScale;
+    }
+
+    public void setWaterDragScale(float waterDragScale) {
+        this.waterDragScale = waterDragScale;
     }
 
     public BuoyancyType getBuoyancyType() {

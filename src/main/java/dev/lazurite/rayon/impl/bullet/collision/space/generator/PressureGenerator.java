@@ -136,8 +136,9 @@ public class PressureGenerator {
                         }
                     }
 
-                    /* Do water drag */
-                    if (rigidBody.isWaterDragEnabled()) {
+                    /* Do water drag (scaled per-body: waterDragScale of 0 disables it entirely) */
+                    final var waterDragScale = rigidBody.getWaterDragScale();
+                    if (rigidBody.isWaterDragEnabled() && waterDragScale > 0.0f) {
                         final var tangentialVelocity = new Vector3f(angularVelocity).cross(centroid); // angular velocity converted to linear parallel to edge of circle (tangential)
                         final var netVelocity = new Vector3f(tangentialVelocity).addLocal(linearVelocity); // total linear + tangential velocity
 
@@ -148,11 +149,12 @@ public class PressureGenerator {
                             /* This stopping force is how we prevent objects from entering orbit upon touching water :( */
                             final var stoppingForce = new Vector3f(netVelocity).multLocal(-1.0f * rigidBody.getMass() * crossSectionalAreas.get(triangle) / totalArea).divideLocal(timeStep);
 
-                            /* So if the stopping force is smaller, we apply that instead. */
+                            /* So if the stopping force is smaller, we apply that instead. Both paths are
+                               scaled by waterDragScale so a body can move through water with reduced drag. */
                             if (dragForce.length() < stoppingForce.length()) {
-                                rigidBody.applyForce(dragForce.multLocal(addedMassAdjustment), centroid);
+                                rigidBody.applyForce(dragForce.multLocal(addedMassAdjustment * waterDragScale), centroid);
                             } else {
-                                rigidBody.applyForce(stoppingForce.divideLocal(STOPPING_TIME), centroid);
+                                rigidBody.applyForce(stoppingForce.divideLocal(STOPPING_TIME).multLocal(waterDragScale), centroid);
                             }
                         }
                     }
