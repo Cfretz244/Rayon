@@ -117,13 +117,21 @@ public class PressureGenerator {
                     final var waterHeight = chunkCache.getFluidColumn(blockPos)
                             .map(fluidColumn -> (float) fluidColumn.getTop().blockPos().getY() + fluidColumn.getTopHeight(posRelativeToBlockCenter) - location.y - centroid.y).orElse(0.0f);
 
-                    chunkCache.getFluidColumn(new BlockPos((int) location.x, (int) location.y, (int) location.z)).ifPresent(fluidColumn -> {
-                        final var flowForce = new Vector3f(fluidColumn.getFlow());
+                    /* Water current push, scaled per-body by waterDragScale (0 disables it, matching
+                       the water-drag paths below). It is applied at the triangle centroid, so at full
+                       scale it also imparts current-driven torque; a body that suppresses water drag
+                       (waterDragScale 0 — e.g. a powered drone) would otherwise still get jittery,
+                       off-center current force every substep, which reads as stutter underwater. */
+                    final var waterDragScale = rigidBody.getWaterDragScale();
+                    if (waterDragScale > 0.0f) {
+                        chunkCache.getFluidColumn(new BlockPos((int) location.x, (int) location.y, (int) location.z)).ifPresent(fluidColumn -> {
+                            final var flowForce = new Vector3f(fluidColumn.getFlow()).multLocal(waterDragScale);
 
-                        if (Float.isFinite(flowForce.lengthSquared()) && flowForce.lengthSquared() > 0.0f) {
-                            rigidBody.applyForce(flowForce, centroid);
-                        }
-                    });
+                            if (Float.isFinite(flowForce.lengthSquared()) && flowForce.lengthSquared() > 0.0f) {
+                                rigidBody.applyForce(flowForce, centroid);
+                            }
+                        });
+                    }
 
                     /* Do water buoyancy */
                     if (rigidBody.isWaterBuoyancyEnabled()) {
@@ -137,7 +145,6 @@ public class PressureGenerator {
                     }
 
                     /* Do water drag (scaled per-body: waterDragScale of 0 disables it entirely) */
-                    final var waterDragScale = rigidBody.getWaterDragScale();
                     if (rigidBody.isWaterDragEnabled() && waterDragScale > 0.0f) {
                         final var tangentialVelocity = new Vector3f(angularVelocity).cross(centroid); // angular velocity converted to linear parallel to edge of circle (tangential)
                         final var netVelocity = new Vector3f(tangentialVelocity).addLocal(linearVelocity); // total linear + tangential velocity
