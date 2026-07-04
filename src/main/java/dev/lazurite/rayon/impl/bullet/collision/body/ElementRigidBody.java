@@ -33,6 +33,12 @@ public abstract class ElementRigidBody extends MinecraftRigidBody {
     // reduced resistance without disabling its other drag. Defaults to 1.0 so existing bodies are
     // unaffected.
     private float waterDragScale = 1.0f;
+    // Reference area used by the SIMPLE central air drag (see PressureGenerator). When < 0 (the
+    // default) the drag area is derived from the collision box, as it always was. Setting an
+    // explicit value DECOUPLES aerodynamic drag from the collision box, so a body can keep a tiny
+    // collision box (e.g. for fitting through gaps) without losing drag / gaining top speed. The
+    // value is Σ(half-extent²) of the desired aero box, matching the box-derived formula.
+    private float dragArea = -1.0f;
     private BuoyancyType buoyancyType;
     private DragType dragType;
     private BoundingBox currentBoundingBox = new BoundingBox();
@@ -96,6 +102,14 @@ public abstract class ElementRigidBody extends MinecraftRigidBody {
 
     public void setWaterDragScale(float waterDragScale) {
         this.waterDragScale = waterDragScale;
+    }
+
+    public float getDragArea() {
+        return this.dragArea;
+    }
+
+    public void setDragArea(float dragArea) {
+        this.dragArea = dragArea;
     }
 
     public BuoyancyType getBuoyancyType() {

@@ -64,6 +64,7 @@ public interface EntityNetworking {
             buf.writeEnum(rigidBody.getDragType());
             buf.writeUUID(rigidBody.getPriorityPlayer() == null ? new UUID(0, 0) : rigidBody.getPriorityPlayer().getUUID());
             buf.writeFloat(rigidBody.getWaterDragScale());
+            buf.writeFloat(rigidBody.getDragArea());
         };
 
         if (rigidBody.getSpace().isServer()) {

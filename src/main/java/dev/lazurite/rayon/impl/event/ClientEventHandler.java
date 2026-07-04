@@ -166,6 +166,7 @@ public final class ClientEventHandler {
         var dragType = buf.readEnum(ElementRigidBody.DragType.class);
         var priorityPlayer = buf.readUUID();
         var waterDragScale = buf.readFloat();
+        var dragArea = buf.readFloat();
         var level = Minecraft.getInstance().level;
 
         if (level != null) {
@@ -183,6 +184,7 @@ public final class ClientEventHandler {
                     rigidBody.setBuoyancyType(buoyancyType);
                     rigidBody.setDragType(dragType);
                     rigidBody.setWaterDragScale(waterDragScale);
+                    rigidBody.setDragArea(dragArea);
                     rigidBody.prioritize(rigidBody.getSpace().getLevel().getPlayerByUUID(priorityPlayer));
                     rigidBody.activate();
                 });

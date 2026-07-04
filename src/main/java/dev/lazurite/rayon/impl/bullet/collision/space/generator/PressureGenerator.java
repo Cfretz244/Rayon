@@ -199,8 +199,16 @@ public class PressureGenerator {
 
             /* Do (simple) air drag */
             if (rigidBody.getDragType() == ElementRigidBody.DragType.SIMPLE) {
-                final var box = rigidBody.getCollisionShape().boundingBox(new Vector3f(), new Quaternion(), new BoundingBox());
-                final var area = box.getExtent(new Vector3f()).lengthSquared();
+                /* Prefer an explicit per-body drag reference area if one is set; otherwise derive it
+                   from the collision box as before. This decouples aero drag from a body's (possibly
+                   tiny) collision box so top speed / flight feel stay independent of the hitbox. */
+                final float area;
+                if (rigidBody.getDragArea() > 0.0f) {
+                    area = rigidBody.getDragArea();
+                } else {
+                    final var box = rigidBody.getCollisionShape().boundingBox(new Vector3f(), new Quaternion(), new BoundingBox());
+                    area = box.getExtent(new Vector3f()).lengthSquared();
+                }
                 final var dragForce = new Vector3f(linearVelocity.normalize()).multLocal(-0.5f * area * dragCoefficient * AIR_DENSITY * linearVelocity.lengthSquared());
 
                 if (Float.isFinite(dragForce.lengthSquared()) && dragForce.lengthSquared() > 0.0f) {
